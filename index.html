@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adsgram Mini App</title>
+    <!-- Telegram Script -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Adsgram Script (Direct Online Link) -->
+    <script src="https://adsgram.ai/js/adsgram.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .card {
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            width: 80%;
+            max-width: 300px;
+        }
+        h2 { margin-top: 0; }
+        button {
+            background-color: #3390ec;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+            width: 100%;
+            font-weight: bold;
+        }
+        button:active { transform: scale(0.98); }
+        #status { margin-top: 15px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>🎉 Earn Reward</h2>
+        <p>Watch a short video ad to support us.</p>
+        
+        <button id="adBtn">📺 Watch Ad</button>
+        <p id="status">Status: Ready</p>
+    </div>
+
+    <script>
+        const adBtn = document.getElementById('adBtn');
+        const statusText = document.getElementById('status');
+
+        // টেলিগ্রাম অ্যাপ কনফিগারেশন
+        const tg = window.Telegram.WebApp;
+        tg.expand(); 
+
+        // Adsgram ইনিশিয়ালাইজেশন
+        let AdController;
+        
+        // আমরা চেক করছি ইউজার টেলিগ্রামের ভেতরে আছে নাকি ব্রাউজারে
+        // ব্রাউজারে থাকলে debug: true হবে (Test Ad), টেলিগ্রামে থাকলে আসল অ্যাড।
+        const isTelegram = tg.initData.length > 0;
+
+        try {
+            AdController = window.Adsgram.init({ 
+                blockId: "int-18091", 
+                debug: !isTelegram // টেলিগ্রাম না হলে ডিবাগ মোড অন থাকবে
+            });
+        } catch (e) {
+            statusText.innerText = "Error: " + e.message;
+        }
+
+        adBtn.addEventListener('click', () => {
+            statusText.innerText = "Status: Loading...";
+            
+            if (AdController) {
+                AdController.show().then((result) => {
+                    // অ্যাড দেখা সফল হলে
+                    statusText.innerText = "✅ Reward Added!";
+                    statusText.style.color = "green";
+                    console.log("Success:", result);
+                    
+                    // এখানে সার্ভারে ডাটা পাঠানোর কোড বসাতে পারেন
+                    // tg.sendData("reward_earned"); 
+
+                }).catch((result) => {
+                    // অ্যাড দেখা হয়নি বা এরর হয়েছে
+                    statusText.innerText = "❌ Failed/Skipped";
+                    statusText.style.color = "red";
+                    console.error("Error:", result);
+                });
+            } else {
+                statusText.innerText = "Adsgram not loaded!";
+            }
+        });
+    </script>
+</body>
+</html>
